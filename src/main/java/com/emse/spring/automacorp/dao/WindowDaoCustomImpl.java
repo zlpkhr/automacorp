@@ -28,4 +28,12 @@ public class WindowDaoCustomImpl implements WindowDaoCustom {
                 .setParameter("roomName", roomName)
                 .getResultList();
     }
+
+    @Override
+    public void deleteByRoom(Long roomId) {
+        String jpql = "DELETE FROM WindowEntity w WHERE w.room.id = :roomId";
+        em.createQuery(jpql)
+                .setParameter("roomId", roomId)
+                .executeUpdate();
+    }
 }
