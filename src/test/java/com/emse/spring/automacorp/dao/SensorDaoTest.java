@@ -19,4 +19,5 @@ public class SensorDaoTest {
         Assertions.assertThat(sensor.getSensorType()).isEqualTo(SensorType.TEMPERATURE);
         Assertions.assertThat(sensor.getValue()).isEqualTo(21.3);
     }
+
 }

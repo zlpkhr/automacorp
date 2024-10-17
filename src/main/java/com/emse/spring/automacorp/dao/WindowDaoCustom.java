@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface WindowDaoCustom {
     List<WindowEntity> findRoomsWithOpenWindows(Long id);
+
+    List<WindowEntity> findAllWindowsByRoomName(String roomName);
 }
