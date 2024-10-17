@@ -1,6 +1,6 @@
 package com.emse.spring.automacorp.dao;
 
-import com.emse.spring.automacorp.model.WindowEntity;
+import com.emse.spring.automacorp.entity.WindowEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;

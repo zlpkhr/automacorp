@@ -1,4 +1,4 @@
-package com.emse.spring.automacorp.model;
+package com.emse.spring.automacorp.entity;
 
 import jakarta.persistence.*;
 

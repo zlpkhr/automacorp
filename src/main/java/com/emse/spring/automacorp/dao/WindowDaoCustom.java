@@ -1,6 +1,6 @@
 package com.emse.spring.automacorp.dao;
 
-import com.emse.spring.automacorp.model.WindowEntity;
+import com.emse.spring.automacorp.entity.WindowEntity;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.emse.spring.automacorp.dao;
 
-import com.emse.spring.automacorp.model.RoomEntity;
+import com.emse.spring.automacorp.entity.RoomEntity;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

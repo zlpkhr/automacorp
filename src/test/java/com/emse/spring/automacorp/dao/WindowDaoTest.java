@@ -1,7 +1,7 @@
 package com.emse.spring.automacorp.dao;
 
-import com.emse.spring.automacorp.model.RoomEntity;
-import com.emse.spring.automacorp.model.WindowEntity;
+import com.emse.spring.automacorp.entity.RoomEntity;
+import com.emse.spring.automacorp.entity.WindowEntity;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
