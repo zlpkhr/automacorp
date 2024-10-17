@@ -10,8 +10,6 @@ public class AutomacorpApplicationConfig {
 
     @Bean
     public CommandLineRunner greetingCommandLine(GreetingService greetingService) {
-        return args -> {
-            greetingService.greet("Spring");
-        };
+        return args -> greetingService.greet("Spring");
     }
 }

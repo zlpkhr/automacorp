@@ -12,8 +12,6 @@ public class DummyUserService implements UserService {
 
     @Override
     public void greetAll(List<String> name) {
-        name.forEach((n) -> {
-            this.greetingService.greet(n);
-        });
+        name.forEach((n) -> this.greetingService.greet(n));
     }
 }
