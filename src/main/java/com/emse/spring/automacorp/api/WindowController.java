@@ -4,7 +4,6 @@ import com.emse.spring.automacorp.dao.WindowDao;
 import com.emse.spring.automacorp.dto.WindowDto;
 import com.emse.spring.automacorp.entity.WindowEntity;
 import com.emse.spring.automacorp.mapper.WindowMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,36 +24,33 @@ public class WindowController {
         return windowDao.findAll().stream().map(WindowMapper::of).collect(Collectors.toList());
     }
 
+    @GetMapping("/{id}")
+    public WindowDto findById(@PathVariable Long id) {
+        return windowDao.findById(id).map(WindowMapper::of).orElse(null);
+    }
+
     @PostMapping
     public ResponseEntity<WindowDto> create(@RequestBody WindowDto dto) {
-        WindowEntity windowEntity = new WindowEntity(dto.name(), null, null);
-        windowEntity = windowDao.save(windowEntity);
-        return ResponseEntity.status(HttpStatus.CREATED).body(WindowMapper.of(windowEntity));
+        WindowEntity entity = new WindowEntity(dto.name(), null, null);
+        WindowEntity saved = windowDao.save(entity);
+        return ResponseEntity.ok(WindowMapper.of(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WindowDto> update(@PathVariable Long id, @RequestBody WindowDto dto) {
-        WindowEntity existingWindow = windowDao.findById(id).orElse(null);
-        if (existingWindow == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<WindowDto> update(@PathVariable Long id, @RequestBody WindowCommand window) {
+        WindowEntity entity = windowDao.findById(id).orElse(null);
+        if (entity == null) {
+            return ResponseEntity.badRequest().build();
         }
-        existingWindow.setName(dto.name());
-        WindowEntity updatedWindow = windowDao.save(existingWindow);
-        return ResponseEntity.ok(WindowMapper.of(updatedWindow));
+        entity.setName(window.name());
+
+        return ResponseEntity.ok(WindowMapper.of(entity));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<WindowDto> findOne(@PathVariable Long id) {
-        return windowDao.findById(id).map(window -> ResponseEntity.ok(WindowMapper.of(window)))
-                .orElse(ResponseEntity.notFound().build());
-    }
+
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (windowDao.existsById(id)) {
-            windowDao.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public void delete(@PathVariable Long id) {
+        windowDao.deleteById(id);
     }
 }
