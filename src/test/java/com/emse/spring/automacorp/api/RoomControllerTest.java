@@ -1,6 +1,7 @@
 package com.emse.spring.automacorp.api;
 
 import com.emse.spring.automacorp.dao.RoomDao;
+import com.emse.spring.automacorp.dao.SensorDao;
 import com.emse.spring.automacorp.entity.FakeEntityBuilder;
 import com.emse.spring.automacorp.entity.RoomEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,9 @@ class RoomControllerTest {
 
     @MockBean
     private RoomDao roomDao;
+
+    @MockBean
+    private SensorDao sensorDao;
 
     @Test
     void shouldFindAll() throws Exception {
