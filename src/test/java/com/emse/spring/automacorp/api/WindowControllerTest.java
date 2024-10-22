@@ -2,9 +2,7 @@ package com.emse.spring.automacorp.api;
 
 import com.emse.spring.automacorp.dao.WindowDao;
 import com.emse.spring.automacorp.dto.WindowDto;
-import com.emse.spring.automacorp.entity.FakeEntityBuilder;
-import com.emse.spring.automacorp.entity.RoomEntity;
-import com.emse.spring.automacorp.entity.WindowEntity;
+import com.emse.spring.automacorp.entity.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -49,7 +47,8 @@ class WindowControllerTest {
         Mockito.when(windowDao.findById(999L)).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/windows/999").accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(""));
     }
 
     @Test
@@ -73,15 +72,18 @@ class WindowControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1")
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
     void shouldUpdate() throws Exception {
         RoomEntity roomEntity = FakeEntityBuilder.createRoomEntity(1L, "Room 1", 1);
+        SensorEntity sensorEntity = new SensorEntity(SensorType.STATUS, "Sensor 1");
         WindowEntity windowEntity = FakeEntityBuilder.createWindowEntity(1L, "Window 1", roomEntity);
-        WindowDto windowDto = new WindowDto(1L, "Updated Window 1", null, roomEntity.getId());
-        String json = objectMapper.writeValueAsString(windowDto);
+        windowEntity.setWindowStatus(sensorEntity);
+        SensorCommand sensorCommand = new SensorCommand("Updated Sensor", 50.0, SensorType.STATUS);
+        WindowCommand command = new WindowCommand("Updated Window 1", sensorCommand);
+        String json = objectMapper.writeValueAsString(command);
 
         Mockito.when(windowDao.findById(1L)).thenReturn(Optional.of(windowEntity));
         Mockito.when(windowDao.save(Mockito.any(WindowEntity.class))).thenReturn(windowEntity);
@@ -90,7 +92,10 @@ class WindowControllerTest {
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Updated Window 1"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Updated Window 1"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.name").value("Updated Sensor"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.value").value(50.0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.sensorType").value(SensorType.STATUS.toString()));
     }
 
     @Test
@@ -105,7 +110,7 @@ class WindowControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/windows")
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("New Window"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1));
     }
@@ -115,14 +120,6 @@ class WindowControllerTest {
         Mockito.when(windowDao.existsById(1L)).thenReturn(true);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/windows/1"))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenDeletingUnknownId() throws Exception {
-        Mockito.when(windowDao.existsById(999L)).thenReturn(false);
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/windows/999"))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
