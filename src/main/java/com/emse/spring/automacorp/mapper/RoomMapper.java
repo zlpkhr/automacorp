@@ -12,11 +12,15 @@ public class RoomMapper {
                 .map(WindowMapper::of)
                 .toList();
 
+        Double currentTemperatureValue = roomEntity.getCurrentTemperature() != null
+                ? roomEntity.getCurrentTemperature().getValue()
+                : null;
+
         return new RoomDto(
                 roomEntity.getId(),
                 roomEntity.getName(),
                 roomEntity.getFloor(),
-                roomEntity.getCurrentTemperature().getValue(),
+                currentTemperatureValue,
                 roomEntity.getTargetTemperature(),
                 windows
         );
