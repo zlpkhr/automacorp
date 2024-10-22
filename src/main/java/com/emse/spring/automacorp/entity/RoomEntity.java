@@ -18,13 +18,13 @@ public class RoomEntity {
     @Column(nullable = false)
     private String name;
 
-    @OneToOne()
+    @OneToOne(cascade = CascadeType.ALL)
     private SensorEntity currentTemperature;
 
     @Column
     private Double targetTemperature;
 
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WindowEntity> windows;
 
     public RoomEntity() {
