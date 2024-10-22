@@ -38,7 +38,7 @@ public class SensorController {
     }
 
     @PostMapping
-    public ResponseEntity<SensorDto> create(@RequestBody SensorCommand sensor) { //
+    public ResponseEntity<SensorDto> create(@RequestBody SensorCommand sensor) {
         SensorEntity entity = new SensorEntity(sensor.sensorType(), sensor.name());
         entity.setValue(sensor.value());
         SensorEntity saved = sensorDao.save(entity);
