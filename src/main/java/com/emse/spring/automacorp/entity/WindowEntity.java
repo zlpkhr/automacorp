@@ -12,10 +12,10 @@ public class WindowEntity {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     private SensorEntity windowStatus;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     private RoomEntity room;
 
     public WindowEntity() {

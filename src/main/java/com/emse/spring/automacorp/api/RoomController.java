@@ -1,10 +1,10 @@
 package com.emse.spring.automacorp.api;
 
 import com.emse.spring.automacorp.dao.RoomDao;
+import com.emse.spring.automacorp.dao.SensorDao;
 import com.emse.spring.automacorp.dto.RoomDto;
 import com.emse.spring.automacorp.entity.RoomEntity;
 import com.emse.spring.automacorp.entity.SensorEntity;
-import com.emse.spring.automacorp.entity.SensorType;
 import com.emse.spring.automacorp.entity.WindowEntity;
 import com.emse.spring.automacorp.mapper.RoomMapper;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/rooms")
 public class RoomController {
     private final RoomDao roomDao;
+    private final SensorDao sensorDao;
 
-    public RoomController(RoomDao roomDao) {
+    public RoomController(RoomDao roomDao, SensorDao sensorDao) {
         this.roomDao = roomDao;
+        this.sensorDao = sensorDao;
     }
 
     @GetMapping
@@ -39,22 +41,37 @@ public class RoomController {
     public ResponseEntity<RoomDto> upsert(@RequestBody RoomCommand room) {
         Optional<RoomEntity> entity = roomDao.findById(room.id());
 
+        RoomEntity roomEntity;
         if (entity.isPresent()) {
-            entity.get().setCurrentTemperature(new SensorEntity(room.currentTemperature().sensorType(), room.currentTemperature().name()));
-            entity.get().getCurrentTemperature().setValue(room.currentTemperature().value());
-            entity.get().setWindows(room.windows().stream().map(window -> new WindowEntity(window.name(), new SensorEntity(window.windowStatus().sensorType(), window.windowStatus().name()), entity.get())).collect(Collectors.toList()));
-            RoomEntity saved = roomDao.save(entity.get());
-
-            return ResponseEntity.ok(RoomMapper.of(saved));
+            roomEntity = entity.get();
+            roomEntity.setName(room.name());
+            roomEntity.setFloor(room.floor());
+            roomEntity.setTargetTemperature(room.targetTemperature());
+        } else {
+            roomEntity = new RoomEntity(room.floor(), room.name(), room.targetTemperature());
+            roomEntity.setId(room.id());
         }
-        RoomEntity createdEntity = new RoomEntity(room.floor(), room.name(), room.targetTemperature());
-        createdEntity.setCurrentTemperature(new SensorEntity(room.currentTemperature().sensorType(), room.currentTemperature().name()));
-        createdEntity.getCurrentTemperature().setValue(room.currentTemperature().value());
-        createdEntity.setWindows(room.windows().stream().map(window -> new WindowEntity(window.name(), new SensorEntity(window.windowStatus().sensorType(), window.windowStatus().name()), createdEntity)).collect(Collectors.toList()));
-        RoomEntity saved = roomDao.save(createdEntity);
+
+        roomDao.save(roomEntity);
+
+        SensorEntity currentTempSensor = new SensorEntity(room.currentTemperature().sensorType(), room.currentTemperature().name());
+        currentTempSensor.setValue(room.currentTemperature().value());
+        sensorDao.save(currentTempSensor);
+
+        roomEntity.setCurrentTemperature(currentTempSensor);
+
+        List<WindowEntity> windows = room.windows().stream().map(window -> {
+            SensorEntity windowStatusSensor = new SensorEntity(window.windowStatus().sensorType(), window.windowStatus().name());
+            sensorDao.save(windowStatusSensor);
+
+            return new WindowEntity(window.name(), windowStatusSensor, roomEntity);
+        }).collect(Collectors.toList());
+
+        roomEntity.setWindows(windows);
+
+        RoomEntity saved = roomDao.save(roomEntity);
 
         return ResponseEntity.ok(RoomMapper.of(saved));
-
     }
 
 
@@ -67,10 +84,6 @@ public class RoomController {
     public ResponseEntity<Void> openWindows(@PathVariable("room_id") Long roomId) {
         Optional<RoomEntity> roomEntity = roomDao.findById(roomId);
         if (roomEntity.isPresent()) {
-            if (roomEntity.get().getCurrentTemperature().getSensorType() != SensorType.STATUS) {
-                return ResponseEntity.badRequest().build();
-            }
-
             roomEntity.get().getWindows().forEach(window -> window.getWindowStatus().setValue(1.0));
             roomDao.save(roomEntity.get());
             return ResponseEntity.ok().build();
@@ -82,9 +95,6 @@ public class RoomController {
     public ResponseEntity<Void> closeWindows(@PathVariable("room_id") Long roomId) {
         Optional<RoomEntity> roomEntity = roomDao.findById(roomId);
         if (roomEntity.isPresent()) {
-            if (roomEntity.get().getCurrentTemperature().getSensorType() != SensorType.STATUS) {
-                return ResponseEntity.badRequest().build();
-            }
             roomEntity.get().getWindows().forEach(window -> window.getWindowStatus().setValue(0.0));
             roomDao.save(roomEntity.get());
             return ResponseEntity.ok().build();
