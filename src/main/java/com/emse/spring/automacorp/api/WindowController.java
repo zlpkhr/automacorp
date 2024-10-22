@@ -47,6 +47,8 @@ public class WindowController {
         entity.getWindowStatus().setValue(window.windowStatus().value());
         entity.getWindowStatus().setSensorType(window.windowStatus().sensorType());
 
+        windowDao.save(entity);
+
         return ResponseEntity.ok(WindowMapper.of(entity));
     }
 

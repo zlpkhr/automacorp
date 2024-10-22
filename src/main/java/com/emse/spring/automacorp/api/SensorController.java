@@ -55,6 +55,8 @@ public class SensorController {
         entity.setName(sensor.name());
         entity.setSensorType(sensor.sensorType());
 
+        sensorDao.save(entity);
+
         return ResponseEntity.ok(SensorMapper.of(entity));
     }
 
