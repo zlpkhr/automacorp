@@ -52,13 +52,15 @@ public class RoomController {
             roomEntity.setId(room.id());
         }
 
+
         roomDao.save(roomEntity);
 
-        SensorEntity currentTempSensor = new SensorEntity(room.currentTemperature().sensorType(), room.currentTemperature().name());
-        currentTempSensor.setValue(room.currentTemperature().value());
-        sensorDao.save(currentTempSensor);
-
-        roomEntity.setCurrentTemperature(currentTempSensor);
+        if (room.currentTemperature() != null) {
+            SensorEntity currentTempSensor = new SensorEntity(room.currentTemperature().sensorType(), room.currentTemperature().name());
+            currentTempSensor.setValue(room.currentTemperature().value());
+            sensorDao.save(currentTempSensor);
+            roomEntity.setCurrentTemperature(currentTempSensor);
+        }
 
         List<WindowEntity> windows = room.windows().stream().map(window -> {
             SensorEntity windowStatusSensor = new SensorEntity(window.windowStatus().sensorType(), window.windowStatus().name());
