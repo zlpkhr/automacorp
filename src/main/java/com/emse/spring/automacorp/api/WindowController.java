@@ -43,6 +43,9 @@ public class WindowController {
             return ResponseEntity.badRequest().build();
         }
         entity.setName(window.name());
+        entity.getWindowStatus().setName(window.windowStatus().name());
+        entity.getWindowStatus().setValue(window.windowStatus().value());
+        entity.getWindowStatus().setSensorType(window.windowStatus().sensorType());
 
         return ResponseEntity.ok(WindowMapper.of(entity));
     }
