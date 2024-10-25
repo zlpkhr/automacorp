@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(WindowController.class)
 class WindowControllerTest {
@@ -30,6 +33,7 @@ class WindowControllerTest {
     private WindowDao windowDao;
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldFindAll() throws Exception {
         RoomEntity roomEntity = FakeEntityBuilder.createRoomEntity(1L, "Room 1", 1);
         Mockito.when(windowDao.findAll()).thenReturn(List.of(
@@ -43,6 +47,7 @@ class WindowControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldReturnNullWhenFindByUnknownId() throws Exception {
         Mockito.when(windowDao.findById(999L)).thenReturn(Optional.empty());
 
@@ -52,6 +57,7 @@ class WindowControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldFindById() throws Exception {
         RoomEntity roomEntity = FakeEntityBuilder.createRoomEntity(1L, "Room 1", 1);
         WindowEntity windowEntity = FakeEntityBuilder.createWindowEntity(1L, "Window 1", roomEntity);
@@ -63,6 +69,7 @@ class WindowControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldNotUpdateUnknownEntity() throws Exception {
         WindowDto windowDto = new WindowDto(1L, "Window 1", null, null);
         String json = objectMapper.writeValueAsString(windowDto);
@@ -71,11 +78,12 @@ class WindowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1")
                         .content(json)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldUpdate() throws Exception {
         RoomEntity roomEntity = FakeEntityBuilder.createRoomEntity(1L, "Room 1", 1);
         SensorEntity sensorEntity = new SensorEntity(SensorType.STATUS, "Sensor 1");
@@ -90,7 +98,7 @@ class WindowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1")
                         .content(json)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Updated Window 1"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.name").value("Updated Sensor"))
@@ -99,6 +107,7 @@ class WindowControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldCreate() throws Exception {
         RoomEntity roomEntity = FakeEntityBuilder.createRoomEntity(1L, "Room 1", 1);
         WindowEntity windowEntity = FakeEntityBuilder.createWindowEntity(1L, "New Window", roomEntity);
@@ -109,17 +118,18 @@ class WindowControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/windows")
                         .content(json)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("New Window"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1));
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldDelete() throws Exception {
         Mockito.when(windowDao.existsById(1L)).thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/windows/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/windows/1").with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

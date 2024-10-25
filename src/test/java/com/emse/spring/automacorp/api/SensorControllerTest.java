@@ -12,12 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 
 @WebMvcTest(SensorController.class)
@@ -35,6 +38,7 @@ class SensorControllerTest {
     private SensorDao sensorDao;
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldFindAll() throws Exception {
         Mockito.when(sensorDao.findAll()).thenReturn(List.of(
                 FakeEntityBuilder.createSensorEntity(1L, "Temperature room 1", SensorType.TEMPERATURE, 23.5),
@@ -53,6 +57,7 @@ class SensorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldReturnNullWhenFindByUnknownId() throws Exception {
         Mockito.when(sensorDao.findById(999L)).thenReturn(Optional.empty());
 
@@ -64,6 +69,7 @@ class SensorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldFindById() throws Exception {
         SensorEntity sensorEntity = FakeEntityBuilder.createSensorEntity(1L, "Temperature room 1", SensorType.TEMPERATURE, 23.5);
         Mockito.when(sensorDao.findById(999L)).thenReturn(Optional.of(sensorEntity));
@@ -76,6 +82,7 @@ class SensorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldNotUpdateUnknownEntity() throws Exception {
         SensorEntity sensorEntity = FakeEntityBuilder.createSensorEntity(1L, "Temperature room 1", SensorType.TEMPERATURE, 23.5);
         SensorCommand expectedSensor = new SensorCommand(sensorEntity.getName(), sensorEntity.getValue(), sensorEntity.getSensorType());
@@ -88,12 +95,14 @@ class SensorControllerTest {
                                 .put("/api/sensors/1")
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .with(csrf())
                 )
                 // check the HTTP response
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldUpdate() throws Exception {
         SensorEntity sensorEntity = FakeEntityBuilder.createSensorEntity(1L, "Temperature room 1", SensorType.TEMPERATURE, 23.5);
         SensorCommand expectedSensor = new SensorCommand(sensorEntity.getName(), sensorEntity.getValue(), sensorEntity.getSensorType());
@@ -106,6 +115,7 @@ class SensorControllerTest {
                                 .put("/api/sensors/1")
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .with(csrf())
                 )
                 // check the HTTP response
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -114,6 +124,7 @@ class SensorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldCreate() throws Exception {
         SensorEntity sensorEntity = FakeEntityBuilder.createSensorEntity(1L, "Temperature room 1", SensorType.TEMPERATURE, 23.5);
         SensorCommand expectedSensor = new SensorCommand(sensorEntity.getName(), sensorEntity.getValue(), sensorEntity.getSensorType());
@@ -127,6 +138,7 @@ class SensorControllerTest {
                                 .post("/api/sensors")
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .with(csrf())
                 )
                 // check the HTTP response
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -135,8 +147,9 @@ class SensorControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
     void shouldDelete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/sensors/999"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/sensors/999").with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
