@@ -36,14 +36,9 @@ class WindowControllerTest {
     @WithMockUser(username = "user", roles = {"USER"})
     void shouldFindAll() throws Exception {
         RoomEntity roomEntity = FakeEntityBuilder.createRoomEntity(1L, "Room 1", 1);
-        Mockito.when(windowDao.findAll()).thenReturn(List.of(
-                FakeEntityBuilder.createWindowEntity(1L, "Window 1", roomEntity),
-                FakeEntityBuilder.createWindowEntity(2L, "Window 2", roomEntity)
-        ));
+        Mockito.when(windowDao.findAll()).thenReturn(List.of(FakeEntityBuilder.createWindowEntity(1L, "Window 1", roomEntity), FakeEntityBuilder.createWindowEntity(2L, "Window 2", roomEntity)));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/windows").accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("[*].name").value(Matchers.containsInAnyOrder("Window 1", "Window 2")));
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/windows").accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("[*].name").value(Matchers.containsInAnyOrder("Window 1", "Window 2")));
     }
 
     @Test
@@ -51,9 +46,7 @@ class WindowControllerTest {
     void shouldReturnNullWhenFindByUnknownId() throws Exception {
         Mockito.when(windowDao.findById(999L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/windows/999").accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(""));
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/windows/999").accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().string(""));
     }
 
     @Test
@@ -63,9 +56,7 @@ class WindowControllerTest {
         WindowEntity windowEntity = FakeEntityBuilder.createWindowEntity(1L, "Window 1", roomEntity);
         Mockito.when(windowDao.findById(1L)).thenReturn(Optional.of(windowEntity));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/windows/1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Window 1"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/windows/1").accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Window 1"));
     }
 
     @Test
@@ -76,10 +67,7 @@ class WindowControllerTest {
 
         Mockito.when(windowDao.findById(1L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1").content(json).contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf())).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
@@ -96,14 +84,7 @@ class WindowControllerTest {
         Mockito.when(windowDao.findById(1L)).thenReturn(Optional.of(windowEntity));
         Mockito.when(windowDao.save(Mockito.any(WindowEntity.class))).thenReturn(windowEntity);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Updated Window 1"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.name").value("Updated Sensor"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.value").value(50.0))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.sensorType").value(SensorType.STATUS.toString()));
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/windows/1").content(json).contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf())).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Updated Window 1")).andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.name").value("Updated Sensor")).andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.value").value(50.0)).andExpect(MockMvcResultMatchers.jsonPath("$.windowStatus.sensorType").value(SensorType.STATUS.toString()));
     }
 
     @Test
@@ -116,12 +97,7 @@ class WindowControllerTest {
 
         Mockito.when(windowDao.save(Mockito.any(WindowEntity.class))).thenReturn(windowEntity);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/windows")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("New Window"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1));
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/windows").content(json).contentType(MediaType.APPLICATION_JSON_VALUE).with(csrf())).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.name").value("New Window")).andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1));
     }
 
     @Test
@@ -129,7 +105,6 @@ class WindowControllerTest {
     void shouldDelete() throws Exception {
         Mockito.when(windowDao.existsById(1L)).thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/windows/1").with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/windows/1").with(csrf())).andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

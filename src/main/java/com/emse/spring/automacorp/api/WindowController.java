@@ -53,7 +53,6 @@ public class WindowController {
     }
 
 
-
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         windowDao.deleteById(id);

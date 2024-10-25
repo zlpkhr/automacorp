@@ -16,10 +16,6 @@ import java.util.List;
 @ExtendWith(SpringExtension.class) //
 class DummyUserServiceTest {
 
-    @Configuration //
-    @ComponentScan("com.emse.spring.automacorp.hello")
-    public static class DummyUserServiceTestConfig{}
-
     @Autowired //
     public DummyUserService dummyUserService;
 
@@ -27,5 +23,10 @@ class DummyUserServiceTest {
     public void testGreetingAll(CapturedOutput output) {
         dummyUserService.greetAll(List.of("Elodie", "Charles"));
         Assertions.assertThat(output).contains("Hello, Elodie!", "Hello, Charles!");
+    }
+
+    @Configuration //
+    @ComponentScan("com.emse.spring.automacorp.hello")
+    public static class DummyUserServiceTestConfig {
     }
 }
